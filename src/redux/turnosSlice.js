@@ -6,6 +6,10 @@ export const fetchTurnos = createAsyncThunk('turnos/fetchTurnos', async () => {
   return data
 });
 
+export const addComment = createAsyncThunk('turnos/addComment', async (data) => {
+  await turnosService.addComment(data)
+})
+
 const turnosSlice = createSlice({
   name: 'turnos',
   initialState: {
@@ -17,7 +21,7 @@ const turnosSlice = createSlice({
   reducers: {
     getPaciente: (state, action) => {
       const paciente = state.data.turnos.find(turno => turno.paciente._id.toString() === action.payload.id)
-      console.log(paciente)
+      
       state.currentUser = paciente
     },
     cleanPaciente: (state, action) => {

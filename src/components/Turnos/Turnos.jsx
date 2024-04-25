@@ -14,13 +14,13 @@ const columns = [
         field: 'paciente',
         headerName: 'Paciente',
         type: 'string',
-        width: 350,
+        width: 280,
         editable: true,
     },
     {
         field: 'hora',
         headerName: 'Hora',
-        width: 100,
+        width: 80,
         editable: true,
     }
 ];
@@ -28,7 +28,7 @@ export default function Turnos() {
     const dispatch = useDispatch();
     const turnos = useSelector(state => state.turnos);
     const [openModal, setOpenModal] = useState(false);
-    const [userId, setUserId] = useState(null)
+    const [user, setUser] = useState(null)
 
     useEffect(() => {
         if (turnos.status === 'idle') {
@@ -36,11 +36,9 @@ export default function Turnos() {
         }
     }, [dispatch, turnos.status]);
     
-    const handleCellClick = (id) => {
+    const handleCellClick = (data) => {
         setOpenModal(true);
-        // console.log(id)
-        setUserId(id);
-        // console.log(turnos)
+        setUser(data);
     };
 
     if (turnos.status === 'loading') {
@@ -89,9 +87,9 @@ export default function Turnos() {
                     }
                 }
                 pageSizeOptions={[20]}
-                onCellClick={(e) => handleCellClick(e.id)}
+                onCellClick={(e) => handleCellClick({paciente: e.id, hora: e.row.hora})}
             />
-            <NestedModal openModal={openModal} setOpenModal={setOpenModal} user={userId} />
+            <NestedModal openModal={openModal} setOpenModal={setOpenModal} user={user} />
         </Box>
     );
 }

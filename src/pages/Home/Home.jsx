@@ -1,5 +1,5 @@
 import { Typography} from '@mui/material';
-import { date } from './helpers';
+import { date } from '../../helpers/helpers';
 import Turnos from '../../components/Turnos/Turnos';
 const Home = () => {
     return (
