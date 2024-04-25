@@ -3,7 +3,6 @@ import turnosService from '../services/api';
 
 export const fetchTurnos = createAsyncThunk('turnos/fetchTurnos', async () => {
   const data = await turnosService.getTurnos();
-  console.log(data)
   return data
 });
 
@@ -12,9 +11,19 @@ const turnosSlice = createSlice({
   initialState: {
     data: [],
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-    error: null
+    error: null, 
+    currentUser: null
   },
-  reducers: {},
+  reducers: {
+    getPaciente: (state, action) => {
+      const paciente = state.data.turnos.find(turno => turno.paciente._id.toString() === action.payload.id)
+      console.log(paciente)
+      state.currentUser = paciente
+    },
+    cleanPaciente: (state, action) => {
+      state.currentUser = null
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTurnos.pending, (state) => {
@@ -30,5 +39,5 @@ const turnosSlice = createSlice({
       });
   }
 });
-
+export const {getPaciente, cleanPaciente} = turnosSlice.actions
 export default turnosSlice.reducer;

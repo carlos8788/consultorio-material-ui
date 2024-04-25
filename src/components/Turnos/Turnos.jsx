@@ -5,6 +5,8 @@ import { useDispatch } from 'react-redux';
 import { fetchTurnos } from '../../redux/turnosSlice';
 import { useEffect } from 'react';
 import Animations from './SkeletonTable';
+import NestedModal from '../Modal/NestedModal';
+import { useState } from 'react';
 
 const columns = [
     // { field: 'id', headerName: 'ID', width: 60, editable: false },
@@ -12,35 +14,37 @@ const columns = [
         field: 'paciente',
         headerName: 'Paciente',
         type: 'string',
-        width: 200,
+        width: 350,
         editable: true,
     },
     {
         field: 'hora',
         headerName: 'Hora',
-        width: 90,
+        width: 100,
         editable: true,
-    },
-    {
-        field: 'diagnostico',
-        headerName: 'Motivo',
-        sortable: false,
-        width: 200,
-    },
+    }
 ];
-
 export default function Turnos() {
     const dispatch = useDispatch();
     const turnos = useSelector(state => state.turnos);
+    const [openModal, setOpenModal] = useState(false);
+    const [userId, setUserId] = useState(null)
 
     useEffect(() => {
         if (turnos.status === 'idle') {
             dispatch(fetchTurnos());
         }
     }, [dispatch, turnos.status]);
+    
+    const handleCellClick = (id) => {
+        setOpenModal(true);
+        // console.log(id)
+        setUserId(id);
+        // console.log(turnos)
+    };
 
     if (turnos.status === 'loading') {
-        return <Animations/>;
+        return <Animations />;
     }
 
     if (turnos.status === 'failed') {
@@ -51,13 +55,14 @@ export default function Turnos() {
         return <div>No hay datos disponibles.</div>;
     }
 
-    const rows = turnos.data.turnos.map((turno, i) => ({
-        id: i + 1,
+    const rows = turnos.data.turnos.map(turno => ({
+        id: turno.paciente._id,
         hora: turno.hora,
-        diagnostico: turno.paciente.observaciones || 'No hay datos',
         paciente: `${turno.paciente.nombre} ${turno.paciente.apellido}`,
-        obraSocial: turno.paciente.obraSocial?.nombre
-    })).sort((a, b) => a.hora.localeCompare(b.hora)); 
+        diagnostico: turno.paciente.observaciones || 'No hay datos',
+        obraSocial: turno.paciente.obraSocial?.nombre,
+        // pacienteId: turno.paciente._id
+    })).sort((a, b) => a.hora.localeCompare(b.hora));
 
     return (
         <Box sx={{
@@ -75,14 +80,18 @@ export default function Turnos() {
                 columns={columns}
                 initialState={{
                     pagination: {
-                        paginationModel: {
-                            pageSize: 20,
-                        },
+                        pageSize: 20,
                     },
                 }}
+                sx={
+                    {
+                        fontSize: '20px',
+                    }
+                }
                 pageSizeOptions={[20]}
-                disableRowSelectionOnClick
+                onCellClick={(e) => handleCellClick(e.id)}
             />
+            <NestedModal openModal={openModal} setOpenModal={setOpenModal} user={userId} />
         </Box>
     );
 }
