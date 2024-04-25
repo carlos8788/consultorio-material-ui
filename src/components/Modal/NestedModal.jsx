@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { date } from '../../helpers/helpers';
+import PopAlert from '../PopAlert';
 
 const style = {
   position: 'absolute',
@@ -28,7 +29,7 @@ function NestedModal({ openModal, setOpenModal, user }) {
   const dispatch = useDispatch();
   const userState = useSelector(state => state.turnos.currentUser);
   const [comentario, setComentario] = useState('');
-
+  const [openAlert, setOpenAlert] = useState(false);
   useEffect(() => {
     if (openModal && user) {
       dispatch(getPaciente({ id: user.paciente }));
@@ -46,49 +47,54 @@ function NestedModal({ openModal, setOpenModal, user }) {
 
   const handleSubmit = () => {
     user.fecha = date
-    console.log({...user, comentario})
+    console.log({ ...user, comentario })
     dispatch(addComment({...user, comentario}))
     setComentario('');
+    handleClose();
+    setOpenAlert(true)
+    setTimeout(()=> setOpenAlert(false), 3000)
   };
 
   return (
-
-    <Modal
-      open={openModal}
-      onClose={handleClose}
-      aria-labelledby="parent-modal-title"
-      aria-describedby="parent-modal-description"
-    >
-      <Box sx={{ ...style }}>
-        <Typography id="parent-modal-title" variant="h5" component="h2" marginBottom={2}>
-          {userState?.paciente.nombre} {userState?.paciente.apellido}
-        </Typography>
-        <Typography variant="h6">
-          DNI: {userState?.paciente.dni}
-        </Typography>
-        <Typography variant="h6">
-          Observaciones: {userState?.diagnostico || 'N/A'}
-        </Typography>
-        <Typography variant="h6" marginBottom={2}>
-          Obra Social: {userState?.paciente.obraSocial.nombre}
-        </Typography>
-        <TextField
-          fullWidth
-          id="comment"
-          label="Comentario"
-          multiline
-          rows={4}
-          variant="outlined"
-          margin="normal"
-          value={comentario}
-          onChange={handleComentarioChange}
-        />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
-          <Button variant="contained" color='success' onClick={handleSubmit} >SUBMIT</Button>
-          <Button variant="contained" onClick={handleClose} color='error'>Close</Button>
+    <>
+      <Modal
+        open={openModal}
+        onClose={handleClose}
+        aria-labelledby="parent-modal-title"
+        aria-describedby="parent-modal-description"
+      >
+        <Box sx={{ ...style }}>
+          <Typography id="parent-modal-title" variant="h5" component="h2" marginBottom={2}>
+            {userState?.paciente.nombre} {userState?.paciente.apellido}
+          </Typography>
+          <Typography variant="h6">
+            DNI: {userState?.paciente.dni}
+          </Typography>
+          <Typography variant="h6">
+            Observaciones: {userState?.diagnostico || 'N/A'}
+          </Typography>
+          <Typography variant="h6" marginBottom={2}>
+            Obra Social: {userState?.paciente.obraSocial.nombre}
+          </Typography>
+          <TextField
+            fullWidth
+            id="comment"
+            label="Comentario"
+            multiline
+            rows={4}
+            variant="outlined"
+            margin="normal"
+            value={comentario}
+            onChange={handleComentarioChange}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: 3 }}>
+            <Button variant="contained" color='success' onClick={handleSubmit} >SUBMIT</Button>
+            <Button variant="contained" onClick={handleClose} color='error'>Close</Button>
+          </Box>
         </Box>
-      </Box>
-    </Modal>
+      </Modal>
+      {openAlert && <PopAlert/>}
+    </>
 
   );
 }
