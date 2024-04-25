@@ -2,7 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import turnosService from '../services/api';
 
 export const fetchTurnos = createAsyncThunk('turnos/fetchTurnos', async () => {
-  return await turnosService.getTurnos();
+  const data = await turnosService.getTurnos();
+  console.log(data)
+  return data
 });
 
 const turnosSlice = createSlice({

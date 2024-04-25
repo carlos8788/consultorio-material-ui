@@ -1,11 +1,10 @@
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
-// import { useSelector } from 'react-redux';
-// import { useDispatch } from 'react-redux';
-// import { fetchTurnos } from '../../redux/turnosSlice';
-import useService from '../../services/api'
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { fetchTurnos } from '../../redux/turnosSlice';
 import { useEffect } from 'react';
-import { useState } from 'react';
+import Animations from './SkeletonTable';
 
 const columns = [
     // { field: 'id', headerName: 'ID', width: 60, editable: false },
@@ -25,33 +24,41 @@ const columns = [
     {
         field: 'diagnostico',
         headerName: 'Motivo',
-        // description: 'This column has a value getter and is not sortable.',
         sortable: false,
         width: 200,
     },
 ];
 
 export default function Turnos() {
-    // const dispatch = useDispatch();
-    const [turnos, setTurnos] = useState([])
-    // const turnos = useSelector(state => state.turnos)
-    useEffect(() => {
-        useService
-            .getTurnos()
-            .then(data => setTurnos(data.turnos))
+    const dispatch = useDispatch();
+    const turnos = useSelector(state => state.turnos);
 
-        // dispatch(fetchTurnos())
-    }, [])
-    // return (<>Hola mundo</>)
-    const rows = turnos.map((turno, i) => {
-        return {
-            id: i+1,
-            hora: turno.hora,
-            diagnostico: turno.paciente.observaciones || 'no hay datos',
-            paciente: `${turno.paciente.nombre} ${turno.paciente.apellido}`,
-            obraSocial: turno.paciente.obraSocial?.nombre
+    useEffect(() => {
+        if (turnos.status === 'idle') {
+            dispatch(fetchTurnos());
         }
-    })
+    }, [dispatch, turnos.status]);
+
+    if (turnos.status === 'loading') {
+        return <Animations/>;
+    }
+
+    if (turnos.status === 'failed') {
+        return <div>Error: {turnos.error}</div>;
+    }
+
+    if (!turnos.data || !turnos.data.turnos || turnos.data.turnos.length === 0) {
+        return <div>No hay datos disponibles.</div>;
+    }
+
+    const rows = turnos.data.turnos.map((turno, i) => ({
+        id: i + 1,
+        hora: turno.hora,
+        diagnostico: turno.paciente.observaciones || 'No hay datos',
+        paciente: `${turno.paciente.nombre} ${turno.paciente.apellido}`,
+        obraSocial: turno.paciente.obraSocial?.nombre
+    })).sort((a, b) => a.hora.localeCompare(b.hora)); 
+
     return (
         <Box sx={{
             height: '100%', 
@@ -74,7 +81,6 @@ export default function Turnos() {
                     },
                 }}
                 pageSizeOptions={[20]}
-                // checkboxSelection
                 disableRowSelectionOnClick
             />
         </Box>
